@@ -453,6 +453,7 @@ body{
 .stat-num{
   font-family:'Noto Serif TC',serif; font-weight:900;
   font-size:clamp(36px,4vw,50px); color:var(--grain-gold); line-height:1;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum";
 }
 .stat-num small{ font-size:.45em; color:var(--husk-300); margin-left:4px; font-weight:600; }
 .stat-name{ color:rgba(247,240,225,.65); font-size:14.5px; letter-spacing:2px; }
@@ -1275,11 +1276,16 @@ body{
     entries.forEach(function(e){
       if (!e.isIntersecting) return;
       counterIO.unobserve(e.target);
-      var el = e.target, target = +el.dataset.target, dur = 1600, t0 = null;
+      var el = e.target, target = +el.dataset.target, dur = 1600;
       if (reduceMotion){ el.textContent = target.toLocaleString(); return; }
+      var last = null, elapsed = 0;
       function tick(t){
-        if (!t0) t0 = t;
-        var p = Math.min((t - t0) / dur, 1);
+        if (last === null) last = t;
+        // 累積每格時間，但單格上限 50ms：LINE 等內建瀏覽器捲動時會暫停 rAF，
+        // 不設上限會在捲動停止後一次補完、數字直接跳到終點
+        elapsed += Math.min(t - last, 50);
+        last = t;
+        var p = Math.min(elapsed / dur, 1);
         var eased = 1 - Math.pow(1 - p, 3);
         el.textContent = Math.round(target * eased).toLocaleString();
         if (p < 1) requestAnimationFrame(tick);
