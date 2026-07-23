@@ -1272,25 +1272,44 @@ body{
   document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
 
   /* ---- Animated counters ---- */
+  function runCount(el){
+    var target = +el.dataset.target, dur = 1600;
+    var finalText = target.toLocaleString();
+    if (reduceMotion){ el.textContent = finalText; return; }
+    // 保留固定寬度：中文襯線字體對數字不一定等寬，計數時寬度會變，
+    // 導致後面的「年+／噸／位+」被推著左右抖動。用最終值的字數鎖住寬度。
+    el.style.display = 'inline-block';
+    el.style.textAlign = 'left';
+    el.style.minWidth = finalText.length + 'ch';
+    var last = null, elapsed = 0;
+    function tick(t){
+      if (last === null) last = t;
+      // 單格時間上限 50ms：某些內建瀏覽器捲動時會暫停 rAF，
+      // 不設上限會在捲動停止後一次補完、數字直接跳到終點
+      elapsed += Math.min(t - last, 50);
+      last = t;
+      var p = Math.min(elapsed / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased).toLocaleString();
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
   var counterIO = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
       if (!e.isIntersecting) return;
       counterIO.unobserve(e.target);
-      var el = e.target, target = +el.dataset.target, dur = 1600;
-      if (reduceMotion){ el.textContent = target.toLocaleString(); return; }
-      var last = null, elapsed = 0;
-      function tick(t){
-        if (last === null) last = t;
-        // 累積每格時間，但單格上限 50ms：LINE 等內建瀏覽器捲動時會暫停 rAF，
-        // 不設上限會在捲動停止後一次補完、數字直接跳到終點
-        elapsed += Math.min(t - last, 50);
-        last = t;
-        var p = Math.min(elapsed / dur, 1);
-        var eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(target * eased).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
+      var el = e.target;
+      // 等面板進場位移動畫（.reveal 的 translateY）結束後才開始計數，
+      // 避免「元素位移 + 文字每格重繪」同時發生造成的次像素抖動（Android WebView 明顯）
+      var panel = el.closest('.reveal');
+      if (reduceMotion || !panel){ runCount(el); return; }
+      var started = false;
+      var go = function(){ if (started) return; started = true; runCount(el); };
+      panel.addEventListener('transitionend', function(ev){
+        if (ev.propertyName === 'transform') go();
+      });
+      setTimeout(go, 1300); // 後備：即使沒收到 transitionend 也一定會啟動
     });
   }, { threshold:0.6 });
   document.querySelectorAll('.count').forEach(function(el){ counterIO.observe(el); });
