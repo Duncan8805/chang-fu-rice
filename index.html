@@ -279,6 +279,7 @@ body{
 .hero-title .gold{
   background:linear-gradient(120deg,var(--grain-gold),var(--grain-glow) 60%,var(--husk-300));
   -webkit-background-clip:text; background-clip:text; color:transparent;
+  white-space:nowrap;
 }
 .hero-title .line{
   display:block; overflow:hidden;
@@ -787,6 +788,14 @@ body{
   .hero-title .line > span{ transform:none; }
   .hero-eyebrow,.hero-sub,.hero-actions,.hero-vertical{ opacity:1; }
   .timeline .timeline-line{ width:84%; }
+}
+
+/* 手機標題修正：縮小字級、字距，並允許換行，避免「純粹稻香」溢出被裁切
+   （放在所有基礎規則之後，確保覆寫生效） */
+@media (max-width:820px){
+  .hero-title{ font-size:clamp(30px,8vw,52px); letter-spacing:1px; }
+  .hero-title .line{ overflow:visible; }
+  .hero-title .line > span{ white-space:normal; }
 }
 </style>
 </head>
