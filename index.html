@@ -811,6 +811,13 @@ body{
   .hero-title{ font-size:clamp(30px,8vw,52px); letter-spacing:1px; }
   .hero-title .line{ overflow:visible; }
   .hero-title .line > span{ white-space:normal; }
+  /* 手機：兩顆按鈕並排（左右），不上下堆疊 */
+  .hero-actions{ flex-wrap:nowrap; width:100%; }
+  .hero-actions .btn{ flex:1 1 0; justify-content:center; padding:15px 10px; }
+  /* 手機：CTA 電話號碼獨立一行、且不被拆斷 */
+  .cta-card .tel-num{ display:block; white-space:nowrap; }
+  .cta-card .tel-label{ text-align:center; }
+  .cta-card .btn-gold{ padding-left:22px; padding-right:22px; }
 }
 </style>
 </head>
@@ -1154,7 +1161,7 @@ body{
       <h3>收成季節到了嗎？<br><span>來電預約烘乾時段</span></h3>
       <p>收穫旺季請提早聯繫，我們為您預留烘乾機台。</p>
     </div>
-    <a href="tel:053691048" class="btn btn-gold phone-track"><svg class="ico"><use href="#i-phone"/></svg> 立即來電 05-369-1048</a>
+    <a href="tel:053691048" class="btn btn-gold phone-track"><svg class="ico"><use href="#i-phone"/></svg><span class="tel-label">立即來電 <span class="tel-num">05-369-1048</span></span></a>
   </div>
 </div>
 
